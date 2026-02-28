@@ -246,7 +246,7 @@ export function encodeMP3(buffer: AudioBuffer, kbps = 192): Promise<Blob> {
       const end = encoder.flush();
       if (end.length > 0) chunks.push(new Uint8Array(end.buffer));
 
-      resolve(new Blob(chunks, { type: 'audio/mp3' }));
+      resolve(new Blob(chunks as BlobPart[], { type: 'audio/mp3' }));
     });
   });
 }
