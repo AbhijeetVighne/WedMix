@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-stone-50 text-stone-800 antialiased;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-display {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Custom scrollbar (desktop only) */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-stone-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-stone-400;
+  }
+}
+
+/* WaveSurfer overrides */
+.track-waveform wave {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Region resize handles — large touch-friendly targets on mobile */
+.track-waveform [data-resize] {
+  cursor: col-resize !important;
+  width: 8px !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  border-radius: 4px !important;
+  transition: background 0.15s;
+}
+.track-waveform [data-resize]:hover {
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+@media (pointer: coarse) {
+  .track-waveform [data-resize] {
+    width: 18px !important;
+    background: rgba(0, 0, 0, 0.25) !important;
+    border-radius: 6px !important;
+    min-height: 100% !important;
+  }
+}
+
+/* Range slider styling for mobile */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #e7e5e4;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f43f5e;
+  cursor: pointer;
+}
+@media (pointer: coarse) {
+  input[type='range']::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+}
