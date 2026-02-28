@@ -228,7 +228,7 @@ export function encodeMP3(buffer: AudioBuffer, kbps = 192): Promise<Blob> {
       const numCh = Math.min(buffer.numberOfChannels, 2);
       const sr = buffer.sampleRate;
       const encoder = new Mp3Encoder(numCh, sr, kbps);
-      const chunks: Uint8Array[] = [];
+      const parts: number[] = [];
       const blockSize = 1152;
 
       const left = floatToInt16(buffer.getChannelData(0));
@@ -240,13 +240,13 @@ export function encodeMP3(buffer: AudioBuffer, kbps = 192): Promise<Blob> {
         const leftChunk = left.subarray(i, i + blockSize);
         const rightChunk = right.subarray(i, i + blockSize);
         const mp3buf = encoder.encodeBuffer(leftChunk, rightChunk);
-        if (mp3buf.length > 0) chunks.push(new Uint8Array(mp3buf.buffer));
+        for (let j = 0; j < mp3buf.length; j++) parts.push(mp3buf[j]);
       }
 
       const end = encoder.flush();
-      if (end.length > 0) chunks.push(new Uint8Array(end.buffer));
+      for (let j = 0; j < end.length; j++) parts.push(end[j]);
 
-      resolve(new Blob(chunks as BlobPart[], { type: 'audio/mp3' }));
+      resolve(new Blob([new Uint8Array(parts).buffer], { type: 'audio/mp3' }));
     });
   });
 }
