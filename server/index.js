@@ -73,6 +73,7 @@ app.get('/api/info', async (req, res) => {
     const { stdout } = await runCommand('yt-dlp', [
       '--no-download',
       '--no-playlist',
+      '--js-runtimes', 'node',
       '--print', '%(title)s',
       '--print', '%(duration)s',
       url,
@@ -108,6 +109,7 @@ app.get('/api/extract', async (req, res) => {
     const { stdout: infoOut } = await runCommand('yt-dlp', [
       '--no-download',
       '--no-playlist',
+      '--js-runtimes', 'node',
       '--print', '%(title)s',
       '--print', '%(duration)s',
       url,
@@ -137,6 +139,7 @@ app.get('/api/extract', async (req, res) => {
       '--audio-format', 'mp3',
       '--audio-quality', '128K',
       '--no-playlist',
+      '--js-runtimes', 'node',
       '-o', '-',
       url,
     ]);
