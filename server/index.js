@@ -48,8 +48,9 @@ app.get('/api/info', async (req, res) => {
 
     res.json({ title, duration });
   } catch (err) {
-    console.error('Info fetch failed:', err.message);
-    res.status(500).json({ error: 'Failed to fetch video info. Check the URL and try again.' });
+    const detail = err.stderr || err.message || 'Unknown error';
+    console.error('Info fetch failed:', detail);
+    res.status(500).json({ error: `yt-dlp error: ${detail.slice(0, 500)}` });
   }
 });
 
@@ -131,8 +132,18 @@ app.get('/api/extract', async (req, res) => {
   }
 });
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', async (_req, res) => {
+  try {
+    const { stdout: ytVer } = await execFileAsync('yt-dlp', ['--version'], { timeout: 5000 });
+    const { stdout: ffVer } = await execFileAsync('ffmpeg', ['-version'], { timeout: 5000 });
+    res.json({
+      status: 'ok',
+      ytdlp: ytVer.trim(),
+      ffmpeg: ffVer.split('\n')[0],
+    });
+  } catch (err) {
+    res.json({ status: 'ok', error: err.message });
+  }
 });
 
 app.listen(PORT, () => {
