@@ -8,23 +8,7 @@ const execFileAsync = promisify(execFile);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const ALLOWED_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:5199',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
-
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin || ALLOWED_ORIGINS.some((o) => origin.startsWith(o))) {
-        cb(null, true);
-      } else {
-        cb(new Error('Not allowed by CORS'));
-      }
-    },
-  }),
-);
+app.use(cors());
 
 const MAX_DURATION_SECONDS = 15 * 60;
 
