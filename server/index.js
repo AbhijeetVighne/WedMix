@@ -9,6 +9,13 @@ app.use(cors());
 
 const MAX_DURATION_SECONDS = 15 * 60;
 
+const YT_DLP_BASE = [
+  '--js-runtimes', 'node',
+  '--no-playlist',
+  '--extractor-args', 'youtube:player_client=web_creator',
+  '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+];
+
 const YT_URL_RE =
   /^https?:\/\/(www\.)?(youtube\.com\/(watch\?v=|shorts\/)|youtu\.be\/|music\.youtube\.com\/watch\?v=)/;
 
@@ -72,8 +79,7 @@ app.get('/api/info', async (req, res) => {
   try {
     const { stdout } = await runCommand('yt-dlp', [
       '--no-download',
-      '--no-playlist',
-      '--js-runtimes', 'node',
+      ...YT_DLP_BASE,
       '--print', '%(title)s',
       '--print', '%(duration)s',
       url,
@@ -108,8 +114,7 @@ app.get('/api/extract', async (req, res) => {
   try {
     const { stdout: infoOut } = await runCommand('yt-dlp', [
       '--no-download',
-      '--no-playlist',
-      '--js-runtimes', 'node',
+      ...YT_DLP_BASE,
       '--print', '%(title)s',
       '--print', '%(duration)s',
       url,
@@ -138,8 +143,7 @@ app.get('/api/extract', async (req, res) => {
       '--extract-audio',
       '--audio-format', 'mp3',
       '--audio-quality', '128K',
-      '--no-playlist',
-      '--js-runtimes', 'node',
+      ...YT_DLP_BASE,
       '-o', '-',
       url,
     ]);
