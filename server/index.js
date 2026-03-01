@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { spawn } from 'node:child_process';
+import { existsSync, writeFileSync } from 'node:fs';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -9,11 +10,27 @@ app.use(cors());
 
 const MAX_DURATION_SECONDS = 15 * 60;
 
+// Write cookies from env var to file if provided (base64 encoded)
+const COOKIES_PATH = '/tmp/cookies.txt';
+if (process.env.YOUTUBE_COOKIES_B64) {
+  writeFileSync(COOKIES_PATH, Buffer.from(process.env.YOUTUBE_COOKIES_B64, 'base64').toString('utf8'));
+  console.log('YouTube cookies loaded from env var');
+} else if (existsSync('/etc/secrets/cookies.txt')) {
+  console.log('YouTube cookies found at /etc/secrets/cookies.txt');
+}
+
+function getCookiesPath() {
+  if (existsSync(COOKIES_PATH)) return COOKIES_PATH;
+  if (existsSync('/etc/secrets/cookies.txt')) return '/etc/secrets/cookies.txt';
+  return null;
+}
+
 const YT_DLP_BASE = [
   '--js-runtimes', 'node',
   '--no-playlist',
   '--extractor-args', 'youtube:player_client=web_creator',
   '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  ...(getCookiesPath() ? ['--cookies', getCookiesPath()] : []),
 ];
 
 const YT_URL_RE =
