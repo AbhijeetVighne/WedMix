@@ -8,6 +8,7 @@ import {
 import { decodeAudioFile, renderMix, encodeWAV, encodeMP3 } from './utils/audio';
 import Header from './components/Header';
 import FileUploader from './components/FileUploader';
+import YouTubeImporter from './components/YouTubeImporter';
 import TrackCard from './components/TrackCard';
 import MixArrangement from './components/MixArrangement';
 import MixToolbar from './components/MixToolbar';
@@ -67,6 +68,27 @@ export default function App() {
     });
     setVolumeRefFileId((prev) => (prev === fileId ? null : prev));
   }, []);
+
+  const handleYouTubeAudioImported = useCallback(
+    (audioBuffer: AudioBuffer, fileName: string) => {
+      const color = TRACK_COLORS[colorIndexRef.current % TRACK_COLORS.length];
+      colorIndexRef.current++;
+      const blob = new Blob([], { type: 'audio/mpeg' });
+      const file = new File([blob], fileName, { type: 'audio/mpeg' });
+      setAudioFiles((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          name: fileName,
+          file,
+          audioBuffer,
+          duration: audioBuffer.duration,
+          color,
+        },
+      ]);
+    },
+    [],
+  );
 
   // ── Segment handling ───────────────────────────────────────────
 
@@ -258,10 +280,22 @@ export default function App() {
         {/* Step 1: Upload */}
         <section>
           <SectionHeading number={1} title="Upload Your Songs" />
-          <FileUploader
-            onFilesSelected={handleFilesSelected}
-            isLoading={isLoading}
-          />
+          <div className="space-y-4">
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              isLoading={isLoading}
+            />
+
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-stone-200" />
+              <span className="text-xs font-medium text-stone-400">or</span>
+              <div className="flex-1 h-px bg-stone-200" />
+            </div>
+
+            <div className="bg-white rounded-2xl border border-stone-200 p-4">
+              <YouTubeImporter onAudioImported={handleYouTubeAudioImported} />
+            </div>
+          </div>
         </section>
 
         {/* Step 2: Song Library */}

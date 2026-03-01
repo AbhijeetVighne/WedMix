@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: wedmix-server
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: FRONTEND_URL
+        sync: false
+    plan: free
