@@ -308,9 +308,9 @@ export default function App() {
             {/* Inline preview player for transition testing */}
             {previewBuffer && previewingTransition !== null && (
               <div className="mt-3">
-                <p className="text-xs text-stone-400 mb-2">
+                <p className="text-xs text-stone-400 dark:text-stone-500 mb-2">
                   Testing {transitions[previewingTransition]?.duration}s crossfade between segments {previewingTransition + 1} &amp; {previewingTransition + 2}
-                  <span className="text-stone-300 ml-1">(5s context + crossfade + 5s context)</span>
+                  <span className="text-stone-300 dark:text-stone-600 ml-1">(5s context + crossfade + 5s context)</span>
                 </p>
                 <PreviewPlayer
                   buffer={previewBuffer}
@@ -329,7 +329,7 @@ export default function App() {
               title="Preview & Export"
               subtitle="Pick a reference song to match volume levels, then preview or export your mix"
             />
-            <div className="bg-white rounded-xl border border-stone-100 shadow-sm p-4 space-y-4">
+            <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm p-4 space-y-4">
               <MixToolbar
                 segmentCount={segments.length}
                 audioFiles={audioFiles}
@@ -353,7 +353,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="border-t border-stone-100 py-4 text-center text-xs text-stone-300">
+      <footer className="border-t border-stone-100 dark:border-stone-800 py-4 text-center text-xs text-stone-300 dark:text-stone-600">
         WedMix — Made with love for your special day
       </footer>
     </div>
@@ -375,12 +375,12 @@ function SectionHeading({
         <span className="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-xs font-bold text-white">
           {number}
         </span>
-        <h2 className="font-display text-lg font-semibold text-stone-800">
+        <h2 className="font-display text-lg font-semibold text-stone-800 dark:text-stone-100">
           {title}
         </h2>
       </div>
       {subtitle && (
-        <p className="text-xs text-stone-400 ml-8.5 pl-0.5">{subtitle}</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 ml-8.5 pl-0.5">{subtitle}</p>
       )}
     </div>
   );

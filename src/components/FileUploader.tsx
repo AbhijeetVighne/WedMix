@@ -44,8 +44,8 @@ export default function FileUploader({ onFilesSelected, isLoading }: Props) {
         relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer
         ${
           isDragging
-            ? 'border-rose-400 bg-rose-50 scale-[1.01]'
-            : 'border-stone-200 bg-white hover:border-rose-300 hover:bg-rose-50/30'
+            ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/30 scale-[1.01]'
+            : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-rose-300 dark:hover:border-rose-500/50 hover:bg-rose-50/30 dark:hover:bg-rose-950/20'
         }
       `}
     >
@@ -61,7 +61,7 @@ export default function FileUploader({ onFilesSelected, isLoading }: Props) {
         <div
           className={`
           w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 transition-all
-          ${isDragging ? 'bg-rose-100' : 'bg-stone-100'}
+          ${isDragging ? 'bg-rose-100 dark:bg-rose-900/30' : 'bg-stone-100 dark:bg-stone-800'}
         `}
         >
           {isLoading ? (
@@ -72,12 +72,12 @@ export default function FileUploader({ onFilesSelected, isLoading }: Props) {
             <Upload className="w-6 h-6 sm:w-7 sm:h-7 text-stone-400" />
           )}
         </div>
-        <p className="text-sm font-medium text-stone-600 mb-1 text-center">
+        <p className="text-sm font-medium text-stone-600 dark:text-stone-300 mb-1 text-center">
           {isLoading
             ? 'Decoding audio files...'
             : 'Tap to browse or drop songs here'}
         </p>
-        <p className="text-xs text-stone-400">
+        <p className="text-xs text-stone-400 dark:text-stone-500">
           MP3, WAV, OGG, AAC, FLAC, M4A
         </p>
       </label>

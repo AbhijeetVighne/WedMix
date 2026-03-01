@@ -34,12 +34,12 @@ export default function MixArrangement({
 }: Props) {
   if (segments.length === 0) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-stone-200 p-8 flex flex-col items-center justify-center text-center">
-        <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center mb-3">
-          <Blend className="w-6 h-6 text-stone-300" />
+      <div className="rounded-2xl border-2 border-dashed border-stone-200 dark:border-stone-700 p-8 flex flex-col items-center justify-center text-center">
+        <div className="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center mb-3">
+          <Blend className="w-6 h-6 text-stone-300 dark:text-stone-600" />
         </div>
-        <p className="text-sm text-stone-400 mb-1">Your mix is empty</p>
-        <p className="text-xs text-stone-300">
+        <p className="text-sm text-stone-400 dark:text-stone-500 mb-1">Your mix is empty</p>
+        <p className="text-xs text-stone-300 dark:text-stone-600">
           Select parts from your songs above and add them to the mix
         </p>
       </div>
@@ -51,9 +51,9 @@ export default function MixArrangement({
       {segments.map((seg, i) => (
         <div key={seg.id}>
           {/* Segment row */}
-          <div className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 bg-white rounded-xl border border-stone-100 shadow-sm">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 bg-white dark:bg-stone-900 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm">
             {/* Position number */}
-            <span className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-xs font-semibold text-stone-400 flex-shrink-0 mt-0.5 sm:mt-0">
+            <span className="w-6 h-6 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-xs font-semibold text-stone-400 dark:text-stone-500 flex-shrink-0 mt-0.5 sm:mt-0">
               {i + 1}
             </span>
 
@@ -65,12 +65,12 @@ export default function MixArrangement({
 
             {/* Info */}
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-stone-700 truncate">
+              <p className="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">
                 {seg.fileName.replace(/\.[^.]+$/, '')}
               </p>
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-stone-400 dark:text-stone-500">
                 {formatTime(seg.startTime)} — {formatTime(seg.endTime)}
-                <span className="ml-1.5 text-stone-300">
+                <span className="ml-1.5 text-stone-300 dark:text-stone-600">
                   ({formatTime(seg.duration)})
                 </span>
               </p>
@@ -81,7 +81,7 @@ export default function MixArrangement({
               <button
                 onClick={() => onMoveSegment(i, 'up')}
                 disabled={i === 0}
-                className="p-2 rounded-lg text-stone-400 hover:text-stone-600 active:bg-stone-100 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 active:bg-stone-100 dark:active:bg-stone-800 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
                 title="Move up"
               >
                 <ArrowUp className="w-4 h-4" />
@@ -89,14 +89,14 @@ export default function MixArrangement({
               <button
                 onClick={() => onMoveSegment(i, 'down')}
                 disabled={i === segments.length - 1}
-                className="p-2 rounded-lg text-stone-400 hover:text-stone-600 active:bg-stone-100 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 active:bg-stone-100 dark:active:bg-stone-800 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
                 title="Move down"
               >
                 <ArrowDown className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onRemoveSegment(i)}
-                className="p-2 rounded-lg text-stone-400 hover:text-red-500 active:bg-red-50 transition-colors"
+                className="p-2 rounded-lg text-stone-400 dark:text-stone-500 hover:text-red-500 active:bg-red-50 dark:active:bg-red-950/30 transition-colors"
                 title="Remove"
               >
                 <Trash2 className="w-4 h-4" />
@@ -107,7 +107,7 @@ export default function MixArrangement({
           {/* Transition control between this and next segment */}
           {i < segments.length - 1 && transitions[i] && (
             <div className="flex items-center gap-2 sm:gap-3 py-2 px-4 sm:px-6">
-              <div className="flex-1 border-t border-dashed border-stone-200" />
+              <div className="flex-1 border-t border-dashed border-stone-200 dark:border-stone-700" />
 
               <div className="flex items-center gap-2 flex-wrap justify-center">
                 <button
@@ -116,8 +116,8 @@ export default function MixArrangement({
                     inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                     ${
                       transitions[i].crossfade
-                        ? 'bg-rose-100 text-rose-600'
-                        : 'bg-stone-100 text-stone-400'
+                        ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500'
                     }
                   `}
                 >
@@ -139,7 +139,7 @@ export default function MixArrangement({
                         }
                         className="w-24 sm:w-20"
                       />
-                      <span className="text-xs font-mono text-stone-400 w-8">
+                      <span className="text-xs font-mono text-stone-400 dark:text-stone-500 w-8">
                         {transitions[i].duration}s
                       </span>
                     </div>
@@ -153,8 +153,8 @@ export default function MixArrangement({
                         inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                         ${
                           previewingTransition === i
-                            ? 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'
-                            : 'bg-stone-100 text-stone-500 hover:bg-stone-200 active:bg-stone-300'
+                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 ring-1 ring-amber-300 dark:ring-amber-700'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600'
                         }
                       `}
                     >
@@ -165,7 +165,7 @@ export default function MixArrangement({
                 )}
               </div>
 
-              <div className="flex-1 border-t border-dashed border-stone-200" />
+              <div className="flex-1 border-t border-dashed border-stone-200 dark:border-stone-700" />
             </div>
           )}
         </div>

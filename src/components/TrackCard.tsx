@@ -119,10 +119,11 @@ export default function TrackCard({
 
     ws.on('ready', () => {
       const dur = ws.getDuration();
+      const isDark = document.documentElement.classList.contains('dark');
       const region = regionsPlugin.addRegion({
         start: 0,
         end: dur,
-        color: audioFile.color + '18',
+        color: audioFile.color + (isDark ? '30' : '18'),
         drag: false,
         resize: true,
       });
@@ -210,24 +211,24 @@ export default function TrackCard({
   const cleanName = audioFile.name.replace(/\.[^.]+$/, '');
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-stone-100 overflow-hidden">
+    <div className="bg-white dark:bg-stone-900 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 border-b border-stone-50">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 border-b border-stone-50 dark:border-stone-800">
         <div className="flex items-center gap-2.5 min-w-0">
           <div
             className="w-3 h-3 rounded-full flex-shrink-0"
             style={{ backgroundColor: audioFile.color }}
           />
-          <span className="text-sm font-medium text-stone-700 truncate">
+          <span className="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">
             {cleanName}
           </span>
-          <span className="text-xs text-stone-400 flex-shrink-0">
+          <span className="text-xs text-stone-400 dark:text-stone-500 flex-shrink-0">
             {formatTime(audioFile.duration)}
           </span>
         </div>
         <button
           onClick={() => onRemoveFile(audioFile.id)}
-          className="p-2 -mr-1 rounded-lg text-stone-300 hover:text-red-400 active:text-red-500 hover:bg-red-50 transition-colors"
+          className="p-2 -mr-1 rounded-lg text-stone-300 dark:text-stone-600 hover:text-red-400 active:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
           title="Remove song"
         >
           <X className="w-4 h-4" />
@@ -246,8 +247,8 @@ export default function TrackCard({
               style={{ color: audioFile.color }}
             >
               {formatTime(currentTime)}
-              <span className="text-stone-300 font-normal text-xs mx-1">/</span>
-              <span className="text-stone-400 text-xs font-normal">
+              <span className="text-stone-300 dark:text-stone-600 font-normal text-xs mx-1">/</span>
+              <span className="text-stone-400 dark:text-stone-500 text-xs font-normal">
                 {formatTime(audioFile.duration)}
               </span>
             </span>
@@ -260,21 +261,21 @@ export default function TrackCard({
         <div className="px-3 sm:px-4 pb-3 space-y-2.5">
           {/* Time inputs for precise selection */}
           <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-xs text-stone-400 flex-shrink-0">Selection</label>
+            <label className="text-xs text-stone-400 dark:text-stone-500 flex-shrink-0">Selection</label>
             <div className="flex items-center gap-1.5">
               <TimeInput
                 value={regionStart}
                 onCommit={(v) => updateRegionFromInputs(Math.min(v, regionEnd - 0.1), regionEnd)}
-                className="w-[4.5rem] text-center text-xs font-mono bg-stone-50 border border-stone-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                className="w-[4.5rem] text-center text-xs font-mono bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg px-2 py-1.5 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
               />
-              <span className="text-stone-300 text-xs">to</span>
+              <span className="text-stone-300 dark:text-stone-600 text-xs">to</span>
               <TimeInput
                 value={regionEnd}
                 onCommit={(v) => updateRegionFromInputs(regionStart, Math.max(v, regionStart + 0.1))}
-                className="w-[4.5rem] text-center text-xs font-mono bg-stone-50 border border-stone-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
+                className="w-[4.5rem] text-center text-xs font-mono bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg px-2 py-1.5 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent"
               />
             </div>
-            <span className="text-[11px] text-stone-300 tabular-nums">
+            <span className="text-[11px] text-stone-300 dark:text-stone-600 tabular-nums">
               ({formatTime(regionEnd - regionStart)})
             </span>
           </div>
@@ -283,7 +284,7 @@ export default function TrackCard({
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={togglePlay}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-stone-100 text-stone-600 hover:bg-stone-200 active:bg-stone-300 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600 transition-colors"
             >
               {isPlaying ? (
                 <Pause className="w-4 h-4" />
@@ -295,7 +296,7 @@ export default function TrackCard({
 
             <button
               onClick={playRegion}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-stone-100 text-stone-600 hover:bg-stone-200 active:bg-stone-300 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 active:bg-stone-300 dark:active:bg-stone-600 transition-colors"
             >
               <Play className="w-4 h-4" />
               Play Selection

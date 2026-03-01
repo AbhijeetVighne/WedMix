@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="theme-color" content="#fafaf9" />
+    <meta name="theme-color" content="#fafaf9" id="theme-color-meta" />
+    <script>
+      (function(){var d=document.documentElement,t=localStorage.getItem('theme');
+      if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches)){
+        d.classList.add('dark');document.getElementById('theme-color-meta').content='#0c0a09';
+      }})();
+    </script>
     <title>WedMix — Wedding Music Editor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
