@@ -12,16 +12,27 @@ interface Props {
 }
 
 function parseTimeStr(value: string): number {
-  // Accept "m:ss", "m.ss" (dot as separator), or plain seconds
   const cleaned = value.trim();
-  const sepMatch = cleaned.match(/^(\d+)[:.](\d{2,}\.?\d*)$/);
-  if (sepMatch) {
-    return parseInt(sepMatch[1], 10) * 60 + parseFloat(sepMatch[2]);
+
+  // Three-part: "mm:ss:tenths" or "mm:ss.tenths" → treat last part as tenths
+  const three = cleaned.match(/^(\d+):(\d+)[:.](\d+)$/);
+  if (three) {
+    const mins = parseInt(three[1], 10);
+    const secs = parseInt(three[2], 10);
+    const tenths = parseInt(three[3], 10);
+    return mins * 60 + secs + tenths / 10;
   }
-  const colonParts = cleaned.split(':');
-  if (colonParts.length === 2) {
-    return parseInt(colonParts[0], 10) * 60 + parseFloat(colonParts[1]);
+
+  // Two-part: "m:ss.d" or "m:ss" or "m.ss"
+  const two = cleaned.match(/^(\d+)[:.](.+)$/);
+  if (two) {
+    const left = parseInt(two[1], 10);
+    const right = parseFloat(two[2]);
+    if (!isNaN(right)) {
+      return left * 60 + right;
+    }
   }
+
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : Math.max(0, num);
 }

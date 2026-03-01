@@ -1,4 +1,5 @@
 import { AudioFileData, SegmentData, TransitionData } from '../types';
+import { Mp3Encoder } from '../lib/lamejs-bundle.js';
 
 export async function decodeAudioFile(file: File): Promise<AudioBuffer> {
   const arrayBuffer = await file.arrayBuffer();
@@ -221,58 +222,51 @@ function floatToInt16(float: Float32Array): Int16Array {
   return out;
 }
 
-export function encodeMP3(buffer: AudioBuffer, kbps = 192): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    import('lamejs')
-      .then(({ Mp3Encoder }) => {
-        try {
-          const numCh = Math.min(buffer.numberOfChannels, 2);
-          const sr = buffer.sampleRate;
-          const encoder = new Mp3Encoder(numCh, sr, kbps);
-          const blockSize = 1152;
+export async function encodeMP3(buffer: AudioBuffer, kbps = 192): Promise<Blob> {
+  const numCh = Math.min(buffer.numberOfChannels, 2);
+  const sr = buffer.sampleRate;
+  const encoder = new Mp3Encoder(numCh, sr, kbps);
+  const blockSize = 1152;
 
-          const left = floatToInt16(buffer.getChannelData(0));
-          const right =
-            numCh > 1 ? floatToInt16(buffer.getChannelData(1)) : left;
+  const left = floatToInt16(buffer.getChannelData(0));
+  const right = numCh > 1 ? floatToInt16(buffer.getChannelData(1)) : left;
 
-          const chunks: Uint8Array[] = [];
-          let totalBytes = 0;
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
 
-          for (let i = 0; i < left.length; i += blockSize) {
-            const leftChunk = left.subarray(i, i + blockSize);
-            const rightChunk = right.subarray(i, i + blockSize);
-            const mp3buf = encoder.encodeBuffer(leftChunk, rightChunk);
-            if (mp3buf.length > 0) {
-              const copy = new Uint8Array(mp3buf.length);
-              copy.set(mp3buf);
-              chunks.push(copy);
-              totalBytes += copy.length;
-            }
-          }
+  for (let i = 0; i < left.length; i += blockSize) {
+    const leftChunk = left.subarray(i, i + blockSize);
+    const rightChunk = right.subarray(i, i + blockSize);
+    const mp3buf = encoder.encodeBuffer(leftChunk, rightChunk);
+    if (mp3buf.length > 0) {
+      const copy = new Uint8Array(mp3buf.length);
+      copy.set(mp3buf);
+      chunks.push(copy);
+      totalBytes += copy.length;
+    }
 
-          const flush = encoder.flush();
-          if (flush.length > 0) {
-            const copy = new Uint8Array(flush.length);
-            copy.set(flush);
-            chunks.push(copy);
-            totalBytes += copy.length;
-          }
+    // Yield to the event loop every ~50 blocks to keep UI responsive
+    if ((i / blockSize) % 50 === 0 && i > 0) {
+      await new Promise((r) => setTimeout(r, 0));
+    }
+  }
 
-          // Merge all chunks into a single ArrayBuffer
-          const result = new Uint8Array(totalBytes);
-          let offset = 0;
-          for (const chunk of chunks) {
-            result.set(chunk, offset);
-            offset += chunk.length;
-          }
+  const flush = encoder.flush();
+  if (flush.length > 0) {
+    const copy = new Uint8Array(flush.length);
+    copy.set(flush);
+    chunks.push(copy);
+    totalBytes += copy.length;
+  }
 
-          resolve(new Blob([result.buffer as ArrayBuffer], { type: 'audio/mp3' }));
-        } catch (err) {
-          reject(err);
-        }
-      })
-      .catch(reject);
-  });
+  const result = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  return new Blob([result.buffer as ArrayBuffer], { type: 'audio/mp3' });
 }
 
 export function formatTime(seconds: number): string {
