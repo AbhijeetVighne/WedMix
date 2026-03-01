@@ -12,14 +12,18 @@ interface Props {
 }
 
 function parseTimeStr(value: string): number {
-  const parts = value.split(':');
-  let seconds = 0;
-  if (parts.length === 2) {
-    seconds = parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
-  } else {
-    seconds = parseFloat(value);
+  // Accept "m:ss", "m.ss" (dot as separator), or plain seconds
+  const cleaned = value.trim();
+  const sepMatch = cleaned.match(/^(\d+)[:.](\d{2,}\.?\d*)$/);
+  if (sepMatch) {
+    return parseInt(sepMatch[1], 10) * 60 + parseFloat(sepMatch[2]);
   }
-  return isNaN(seconds) ? 0 : Math.max(0, seconds);
+  const colonParts = cleaned.split(':');
+  if (colonParts.length === 2) {
+    return parseInt(colonParts[0], 10) * 60 + parseFloat(colonParts[1]);
+  }
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : Math.max(0, num);
 }
 
 function toTimeStr(seconds: number): string {
@@ -60,7 +64,7 @@ function TimeInput({
           (e.target as HTMLInputElement).blur();
         }
       }}
-      inputMode="decimal"
+      inputMode="text"
       className={className}
     />
   );
