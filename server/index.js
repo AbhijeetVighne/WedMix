@@ -1,9 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { execFile, spawn } from 'node:child_process';
-import { promisify } from 'node:util';
-
-const execFileAsync = promisify(execFile);
+import { spawn } from 'node:child_process';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,21 +17,66 @@ function validateUrl(url) {
   return YT_URL_RE.test(url.trim());
 }
 
+function cleanYouTubeUrl(url) {
+  try {
+    const u = new URL(url.trim());
+    const videoId = u.searchParams.get('v');
+    if (videoId) return `https://www.youtube.com/watch?v=${videoId}`;
+    return url.trim();
+  } catch {
+    return url.trim();
+  }
+}
+
+function runCommand(cmd, args, timeoutMs = 60_000) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(cmd, args);
+    const stdout = [];
+    const stderr = [];
+
+    const timer = setTimeout(() => {
+      proc.kill('SIGTERM');
+      reject(new Error('Command timed out'));
+    }, timeoutMs);
+
+    proc.stdout.on('data', (chunk) => stdout.push(chunk));
+    proc.stderr.on('data', (chunk) => stderr.push(chunk));
+
+    proc.on('error', (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+
+    proc.on('close', (code) => {
+      clearTimeout(timer);
+      const out = Buffer.concat(stdout).toString();
+      const err = Buffer.concat(stderr).toString();
+      if (code !== 0) {
+        reject(new Error(err || `Process exited with code ${code}`));
+      } else {
+        resolve({ stdout: out, stderr: err });
+      }
+    });
+  });
+}
+
 // GET /api/info?url=...
 app.get('/api/info', async (req, res) => {
-  const url = req.query.url;
-  if (!validateUrl(url)) {
+  const rawUrl = req.query.url;
+  if (!validateUrl(rawUrl)) {
     return res.status(400).json({ error: 'Invalid YouTube URL' });
   }
 
+  const url = cleanYouTubeUrl(rawUrl);
+
   try {
-    const { stdout } = await execFileAsync('yt-dlp', [
+    const { stdout } = await runCommand('yt-dlp', [
       '--no-download',
-      '--print',
-      '%(title)s\n%(duration)s',
-      '--no-warnings',
-      url.trim(),
-    ], { timeout: 30_000 });
+      '--no-playlist',
+      '--print', '%(title)s',
+      '--print', '%(duration)s',
+      url,
+    ], 30_000);
 
     const lines = stdout.trim().split('\n');
     const title = lines[0] || 'Unknown';
@@ -48,28 +90,28 @@ app.get('/api/info', async (req, res) => {
 
     res.json({ title, duration });
   } catch (err) {
-    const detail = err.stderr || err.message || 'Unknown error';
-    console.error('Info fetch failed:', detail);
-    res.status(500).json({ error: `yt-dlp error: ${detail.slice(0, 500)}` });
+    console.error('Info fetch failed:', err.message);
+    res.status(500).json({ error: err.message.slice(0, 500) });
   }
 });
 
 // GET /api/extract?url=...
 app.get('/api/extract', async (req, res) => {
-  const url = req.query.url;
-  if (!validateUrl(url)) {
+  const rawUrl = req.query.url;
+  if (!validateUrl(rawUrl)) {
     return res.status(400).json({ error: 'Invalid YouTube URL' });
   }
 
+  const url = cleanYouTubeUrl(rawUrl);
+
   try {
-    // First check duration
-    const { stdout: infoOut } = await execFileAsync('yt-dlp', [
+    const { stdout: infoOut } = await runCommand('yt-dlp', [
       '--no-download',
-      '--print',
-      '%(title)s\n%(duration)s',
-      '--no-warnings',
-      url.trim(),
-    ], { timeout: 30_000 });
+      '--no-playlist',
+      '--print', '%(title)s',
+      '--print', '%(duration)s',
+      url,
+    ], 30_000);
 
     const lines = infoOut.trim().split('\n');
     const title = lines[0] || 'audio';
@@ -89,23 +131,21 @@ app.get('/api/extract', async (req, res) => {
     );
     res.setHeader('X-Audio-Title', encodeURIComponent(title));
 
-    // Stream audio directly to response via yt-dlp + ffmpeg
     const proc = spawn('yt-dlp', [
       '-f', 'bestaudio',
       '--extract-audio',
       '--audio-format', 'mp3',
       '--audio-quality', '128K',
-      '--no-warnings',
       '--no-playlist',
       '-o', '-',
-      url.trim(),
+      url,
     ]);
 
     proc.stdout.pipe(res);
 
+    let stderrLog = '';
     proc.stderr.on('data', (chunk) => {
-      const msg = chunk.toString();
-      if (msg.includes('ERROR')) console.error('yt-dlp stderr:', msg);
+      stderrLog += chunk.toString();
     });
 
     proc.on('error', (err) => {
@@ -116,8 +156,11 @@ app.get('/api/extract', async (req, res) => {
     });
 
     proc.on('close', (code) => {
-      if (code !== 0 && !res.headersSent) {
-        res.status(500).json({ error: 'Audio extraction failed' });
+      if (code !== 0) {
+        console.error('yt-dlp extract stderr:', stderrLog);
+        if (!res.headersSent) {
+          res.status(500).json({ error: stderrLog.slice(0, 500) || 'Audio extraction failed' });
+        }
       }
     });
 
@@ -127,15 +170,15 @@ app.get('/api/extract', async (req, res) => {
   } catch (err) {
     console.error('Extract failed:', err.message);
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Audio extraction failed. Check the URL and try again.' });
+      res.status(500).json({ error: err.message.slice(0, 500) });
     }
   }
 });
 
 app.get('/health', async (_req, res) => {
   try {
-    const { stdout: ytVer } = await execFileAsync('yt-dlp', ['--version'], { timeout: 5000 });
-    const { stdout: ffVer } = await execFileAsync('ffmpeg', ['-version'], { timeout: 5000 });
+    const { stdout: ytVer } = await runCommand('yt-dlp', ['--version'], 5000);
+    const { stdout: ffVer } = await runCommand('ffmpeg', ['-version'], 5000);
     res.json({
       status: 'ok',
       ytdlp: ytVer.trim(),
