@@ -81,6 +81,31 @@ function TimeInput({
   );
 }
 
+function DragDot({ position, color }: { position: number; color: string }) {
+  const pct = Math.max(0, Math.min(1, position)) * 100;
+  return (
+    <div
+      className="absolute top-0 h-full pointer-events-none"
+      style={{ left: `${pct}%`, zIndex: 20 }}
+    >
+      {/* Vertical line */}
+      <div
+        className="absolute inset-y-0 w-[3px] -translate-x-1/2 rounded-full"
+        style={{ backgroundColor: color, opacity: 0.8 }}
+      />
+      {/* Circle at center */}
+      <div
+        className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-5 h-5 sm:w-4 sm:h-4 rounded-full border-[2.5px] shadow-lg"
+        style={{
+          backgroundColor: 'white',
+          borderColor: color,
+          boxShadow: `0 0 8px ${color}80`,
+        }}
+      />
+    </div>
+  );
+}
+
 export default function TrackCard({
   audioFile,
   onAddSegment,
@@ -237,7 +262,23 @@ export default function TrackCard({
 
       {/* Waveform */}
       <div className="px-3 sm:px-4 pt-3 pb-2">
-        <div ref={containerRef} className="track-waveform rounded-lg overflow-hidden" />
+        <div className="relative">
+          <div ref={containerRef} className="track-waveform rounded-lg" />
+
+          {/* Draggable edge indicators — rendered on top of waveform */}
+          {isReady && (
+            <>
+              <DragDot
+                position={regionStart / audioFile.duration}
+                color={audioFile.color}
+              />
+              <DragDot
+                position={regionEnd / audioFile.duration}
+                color={audioFile.color}
+              />
+            </>
+          )}
+        </div>
 
         {/* Live playback time */}
         {isReady && isPlaying && (

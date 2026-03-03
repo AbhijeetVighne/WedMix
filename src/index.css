@@ -35,34 +35,17 @@ body {
   overflow: hidden;
 }
 
-/* Region resize handles — large touch-friendly targets on mobile */
+/* Region resize handles — invisible but wide touch targets */
 .track-waveform [data-resize] {
   cursor: col-resize !important;
-  width: 8px !important;
-  background: rgba(0, 0, 0, 0.2) !important;
-  border-radius: 4px !important;
-  transition: background 0.15s;
-}
-.track-waveform [data-resize]:hover {
-  background: rgba(0, 0, 0, 0.4) !important;
-}
-.dark .track-waveform [data-resize] {
-  width: 10px !important;
-  background: rgba(255, 255, 255, 0.35) !important;
-}
-.dark .track-waveform [data-resize]:hover {
-  background: rgba(255, 255, 255, 0.6) !important;
+  width: 12px !important;
+  background: transparent !important;
+  z-index: 30 !important;
 }
 
 @media (pointer: coarse) {
   .track-waveform [data-resize] {
-    width: 18px !important;
-    background: rgba(0, 0, 0, 0.25) !important;
-    border-radius: 6px !important;
-    min-height: 100% !important;
-  }
-  .dark .track-waveform [data-resize] {
-    background: rgba(255, 255, 255, 0.4) !important;
+    width: 24px !important;
   }
 }
 
